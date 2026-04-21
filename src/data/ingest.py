@@ -1,5 +1,6 @@
 from datasets import load_dataset
-from preprocess import process_sample
+from src.data.preprocess import process_sample, validate_sample
+from src.data.save import save_dataset
 import tqdm
 
 def load_data():
@@ -11,6 +12,8 @@ def build_dataset():
     processed = []
 
     for sample in tqdm(dataset["train"]):
+        if not validate_sample(sample):
+            continue
         try:
             processed.append(process_sample(sample))
         except Exception:
@@ -22,4 +25,5 @@ def build_dataset():
 if __name__ == "__main__":
     data = build_dataset()
     print("Processed Samples: ", len(data))
+    save_dataset(data)
 

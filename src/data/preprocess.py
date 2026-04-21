@@ -13,7 +13,15 @@ def normalize_text(text: str) -> str:
     """
 
     # Ensures consistent representation of characters, especially for languages with complex scripts like Sanskrit. 
-    return unicodedata.normalize('NFC', text)
+    text = unicodedata.normalize("NFC", text)
+
+    # Remove zero-width characters (very common noise)
+    text = text.replace("\u200c", "").replace("\u200d", "")
+
+    # Strip extra whitespace
+    text = " ".join(text.split())
+
+    return text
 
 
 # Image preprocessing
@@ -29,14 +37,19 @@ def preprocess_image(image):
     # OCR only cares about structure not color, converting to gray scale only changes the color but doesn't affect the edges of characters, strokes, shapes, contrast between text and background. It reduces data from 3 channel to 2 channel making computation faster lighter and easier to process in bulk pipelines. OCR models rely heavily on luminance contrast like black text on white background or dark text on light background and most OCR preprocessing pipelines assumes grayscale
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
+    # Contrast Normalization
+    image = cv2.equalizeHist(image)
+    
     # Resize to OCR friendly fixed size
-    image = cv2.resize(image, (384, 64))
+    h, w = image.shape
+    new_h = 64
+    new_w = int(w * (new_h / h))
+    image = cv2.resize(image, (new_w, new_h))
 
     # Normalize the pixel value
-
-    img = img.astype(np.float32)  # ensure float
-    img = img / 255.0
-    # img = (img - 0.5) / 0.5
+    image = image.astype(np.float32)  # ensure float
+    image = image / 255.0
+    # image = (image - 0.5) / 0.5
 
     return image
 
