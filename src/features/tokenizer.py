@@ -86,7 +86,7 @@ def decode_indices(indices, idx2char):
             prev = idx
         
 
-    return " ".join(decoded)
+    return "".join(decoded)
 
 
 # Step 5: Wrap into a class
